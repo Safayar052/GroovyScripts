@@ -2,11 +2,15 @@
 import java.nio.file.*
 import java.nio.charset.*
 
-// Search token
-def searchString = "ViewParametricSearch"
+// ISH pipelien search token
+def searchTokenPipeline = "ViewParametricSearch"
+
+// REST call search token
+def searchTokenRest = "products?searchTerm"
+
 
 // Regex pattern to get search term
-def pattern = /SearchTerm=([^&|]+)/
+def pattern = /earchTerm=([^&|]+)/
 
 // Set to store unique Search Terms
 Set<String> uniqueSearchKeys = new HashSet<>()
@@ -24,7 +28,7 @@ if (args.length > 0) {
 
         // Read each line of the file and process it
         Files.lines(path, StandardCharsets.UTF_8).each { line ->
-            if (line.contains(searchString)) {
+            if (line.contains(searchTokenPipeline) || line.contains(searchTokenRest)) {
                 def matcher = (line =~ pattern)
 
                 if (matcher.find()) {
