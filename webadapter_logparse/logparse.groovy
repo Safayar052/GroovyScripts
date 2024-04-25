@@ -2,6 +2,7 @@
 import java.nio.file.*
 import java.nio.charset.*
 import java.util.Properties
+import java.net.URLDecoder
 
 // Load the properties file
 def properties = new Properties()
@@ -24,6 +25,11 @@ if (args.length > 0) {
     // Get directory path
     def directoryPath = args[0]
 
+    // Output file path
+    def outputPath = "searchTerms.csv"
+    if(args.length > 1) {
+        outputPath = args[1]
+    }
     
     //sample code for read file with log extenstion
 
@@ -51,16 +57,40 @@ if (args.length > 0) {
                     def formattedSearchTerm = ((indexOfSpace >= 0 ? searchTerm.substring(0, indexOfSpace) : searchTerm).replaceAll("\\+", " ")).trim()
                     
                     if (formattedSearchTerm.length() > 2) {
-                        uniqueSearchKeys.add(formattedSearchTerm)
+                        try {
+                            // URL decode the string
+                            def decodedString = URLDecoder.decode(formattedSearchTerm, "UTF-8")
+                            uniqueSearchKeys.add(decodedString)
+                        } catch (UnsupportedEncodingException e) {
+                            println "Error decoding the URL-encoded string: ${e.message}"
+                            uniqueSearchKeys.add(formattedSearchTerm)
+                        }                       
                     }
                 }
             }
         }
     }
 
-    println uniqueSearchKeys
+    //println uniqueSearchKeys
 
-    println uniqueSearchKeys.size()
+    //println uniqueSearchKeys.size()
+
+    try {
+        // Create a FileWriter instance with the file path
+        def writer = new PrintWriter(new BufferedWriter(new FileWriter(outputPath)))
+
+        // Write the content to the file
+        uniqueSearchKeys.each { searchTerm ->
+            writer.println(searchTerm)
+        }
+        
+        // Close the writer
+        writer.close()
+
+        println "Content has been written to $outputPath"
+    } catch (IOException e) {
+        println "An error occurred: ${e.message}"
+    }
 
 } else {
     println "No directory path is provided"
